@@ -134,6 +134,19 @@ function createBatchClient({ endpoint, flushIntervalMs }) {
 const apiBatch = createBatchClient({ endpoint: '/api/batch', flushIntervalMs: 1000 });
 const apiAddBatch = createBatchClient({ endpoint: '/api/batch', flushIntervalMs: 10000 });
 
+const pendingRightRemovals = new Set();
+
+function mergeUnique(existing, toAdd) {
+    const seen = new Set(existing);
+    const out = existing.slice();
+    for (const v of toAdd) {
+        if (seen.has(v)) continue;
+        seen.add(v);
+        out.push(v);
+    }
+    return out;
+}
+
 function matchesFilter(id, filter) {
     if (!filter) return true;
     return String(id).includes(String(filter));
@@ -259,10 +272,14 @@ async function loadRight(append = false) {
         const { pack, nextCursor, total } = data;
         const prevCursor = right.cursor;
 
+        const filteredPack = Array.isArray(pack)
+            ? pack.filter((id) => !pendingRightRemovals.has(id))
+            : pack;
+
         if (append) {
-            right.items = [...right.items, ...pack];
+            right.items = mergeUnique(right.items, filteredPack);
         } else {
-            right.items = pack;
+            right.items = Array.isArray(filteredPack) ? filteredPack : pack;
         }
 
         right.total = total;
@@ -380,6 +397,8 @@ window.selectItem = async (id) => {
         renderRight();
     }
 
+    pendingRightRemovals.delete(id);
+
     try {
         const data = await apiBatch.request(
             'select',
@@ -435,6 +454,8 @@ window.deselectItem = async (id) => {
         renderRight();
     }
 
+    pendingRightRemovals.add(id);
+
     if (rightIndex !== -1 && right.cursor > 0) {
         right.cursor = Math.max(0, right.cursor - 1);
     }
@@ -475,6 +496,10 @@ window.deselectItem = async (id) => {
             }
         }
     } catch (e) {
+        if ((e?.message || '').includes('Not yet selected')) {
+            // Treat as idempotent success under network delays / stale client state
+            return;
+        }
         if (optimistic.leftInserted) {
             const idxLeft = left.items.indexOf(id);
             if (idxLeft !== -1) left.items.splice(idxLeft, 1);

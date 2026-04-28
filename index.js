@@ -111,7 +111,17 @@ app.post('/api/batch', (req, res) => {
                     }
 
                     const deselected = db.deselectItem(id);
-                    if (!deselected) return { opId, ok: false, error: 'Not yet selected' };
+                    if (!deselected) {
+                        return {
+                            opId,
+                            ok: true,
+                            data: {
+                                totalSelected: db.countSelection(selectionFilter),
+                                totalItems: db.countItems(itemsFilter),
+                                position: -1,
+                            },
+                        };
+                    }
 
                     const position = db.getItemsPosition(id, itemsFilter, cursorNum);
                     return {
