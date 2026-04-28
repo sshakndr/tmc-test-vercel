@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Manager - Test Assignment</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📋 ID Manager</h1>
+            <p>Manage and organize your items with drag & drop</p>
+        </header>
+
+        <div class="panels">
+            <!-- Левое окно - все элементы -->
+            <div class="panel panel-left">
+                <div class="panel-header">
+                    <h2>📦 All Items</h2>
+                    <div class="search-box">
+                        <input type="text" id="leftSearch" placeholder="Filter by ID..." class="search-input">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+                
+                <div class="add-item-section">
+                    <input type="text" id="newIdInput" placeholder="Enter new ID (e.g., 1000001 or string)" class="add-input">
+                    <button id="addIdBtn" class="btn btn-primary">➕ Add</button>
+                </div>
+
+                <div id="leftListContainer" class="list-container">
+                    <div class="loading">Loading items...</div>
+                </div>
+            </div>
+
+            <!-- Правое окно - выбранные элементы -->
+            <div class="panel panel-right">
+                <div class="panel-header">
+                    <h2>⭐ Selected Items</h2>
+                    <div class="search-box">
+                        <input type="text" id="rightSearch" placeholder="Filter by ID..." class="search-input">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+
+                <div id="rightListContainer" class="list-container drag-container">
+                    <div class="loading">Loading selected items...</div>
+                </div>
+                <div class="info-note">
+                    💡 Drag & drop to reorder selected items
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
